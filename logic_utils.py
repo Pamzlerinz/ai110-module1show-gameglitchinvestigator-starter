@@ -3,10 +3,13 @@
 Kept free of any Streamlit/UI code so it can be unit tested in isolation.
 """
 
+# FIX: these were backwards - a "Too High" guess needs to go LOWER, and a
+# "Too Low" guess needs to go HIGHER, not the other way around. Verified by
+# playing the game and checking the printed hint against the outcome label.
 HINT_MESSAGES = {
     "Win": "🎉 Correct!",
-    "Too High": "📈 Go HIGHER!",
-    "Too Low": "📉 Go LOWER!",
+    "Too High": "📉 Go LOWER!",
+    "Too Low": "📈 Go HIGHER!",
 }
 
 

@@ -1,4 +1,10 @@
-from logic_utils import check_guess, update_score, parse_guess, get_range_for_difficulty
+from logic_utils import (
+    check_guess,
+    update_score,
+    parse_guess,
+    get_range_for_difficulty,
+    get_hint_message,
+)
 
 
 def test_winning_guess():
@@ -18,6 +24,14 @@ def test_guess_too_low():
 
 
 # --- Regression tests for the bugs fixed in Phase 2 ---
+
+def test_hint_direction_is_not_backwards():
+    # FIX regression: "Too High" used to display "Go HIGHER!" and "Too Low"
+    # used to display "Go LOWER!" - exactly inverted from what the player
+    # needs to do next.
+    assert get_hint_message("Too High") == "📉 Go LOWER!"
+    assert get_hint_message("Too Low") == "📈 Go HIGHER!"
+
 
 def test_too_high_always_deducts_points():
     # FIX regression: "Too High" used to award +5 points on even attempt
