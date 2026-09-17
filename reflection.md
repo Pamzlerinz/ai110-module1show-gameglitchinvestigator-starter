@@ -4,19 +4,16 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 1. What was broken when you started?
 
-- What did the game look like the first time you ran it?
-- List at least two concrete bugs you noticed at the start  
-  (for example: "the hints were backwards").
+The first time I ran the game it looked fine on the surface — a title, a difficulty picker, a text box, and a "Submit Guess" button — but playing it a few rounds exposed several real problems. The hints ("Go HIGHER!"/"Go LOWER!") were sometimes flat-out wrong for the number I typed, the score would occasionally go up after a wrong guess instead of down, and once I won or ran out of attempts, clicking "New Game" looked like it reset the board but then immediately locked me back into the "Game over" screen, so I could never actually play a second round. Running `pytest` from the start also failed all three starter tests with `NotImplementedError`, since `logic_utils.py` was just stub functions that nothing had been moved into yet.
 
 **Bug Reproduction Log**
 
-Document at least 3 bugs you found. Add rows as needed.
-
 | Input | Expected Behavior | Actual Behavior | Console Output / Error |
 |-------|-------------------|-----------------|------------------------|
-| | | | |
-| | | | |
-| | | | |
+| Guess of 9 when secret was 50 | "Too Low" hint | "Too High" hint shown on some attempts | none (silent logic bug — secret alternates between `int` and `str` every other attempt, so the comparison falls back to lexicographic string comparison, e.g. `"9" > "50"` is `True`) |
+| Click "New Game" after winning | Board resets and a new round starts | "You already won. Start a new game to play again." is shown again and the app calls `st.stop()`, so the game is permanently stuck | none (silent — `status` is never reset to `"playing"` in the New Game handler) |
+| Guess of 60 when secret was 50, submitted on an even attempt number | Score decreases by 5 for a wrong "Too High" guess | Score increases by 5 instead | none (silent — `update_score`'s "Too High" branch adds points when `attempt_number % 2 == 0`) |
+| Run `pytest tests/` from a fresh clone | All 3 starter tests pass | All 3 tests fail | `NotImplementedError: Refactor this function from app.py into logic_utils.py` |
 
 ---
 

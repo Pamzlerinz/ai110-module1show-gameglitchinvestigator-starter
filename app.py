@@ -30,6 +30,9 @@ def parse_guess(raw: str):
 
 
 def check_guess(guess, secret):
+    # FIXME: Logic breaks here - secret is sometimes an int and sometimes a
+    # str (see the caller below), which pushes this into the TypeError
+    # fallback and produces wrong Too High/Too Low hints.
     if guess == secret:
         return "Win", "🎉 Correct!"
 
@@ -55,6 +58,8 @@ def update_score(current_score: int, outcome: str, attempt_number: int):
         return current_score + points
 
     if outcome == "Too High":
+        # FIXME: Logic breaks here - a wrong "Too High" guess should always
+        # lose points, but this adds points on even attempt numbers instead.
         if attempt_number % 2 == 0:
             return current_score + 5
         return current_score - 5
@@ -132,6 +137,9 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
+    # FIXME: Logic breaks here - status/score/history never get reset, so
+    # the "already won"/"game over" branch below traps the player forever,
+    # and the new secret ignores the selected difficulty's range.
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)
     st.success("New game started.")
