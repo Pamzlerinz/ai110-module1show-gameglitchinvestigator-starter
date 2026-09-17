@@ -19,30 +19,26 @@ The first time I ran the game it looked fine on the surface — a title, a diffi
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion you did not accept as written (including what the AI suggested, why you rejected or changed it, and how you verified your version). It does not have to be a suggestion that was wrong: over-engineered, out of scope, harder to read, or a poor fit for this codebase all count.
+I used Claude (Claude Code, in VS Code) as my AI coding assistant for this whole project.
+
+**A correct suggestion:** I described the hint bug ("guess of 9 against a secret of 50 sometimes says Too High") and asked Claude to explain the underlying logic. It traced the flow through `app.py` and pointed out that on even attempt numbers the code did `secret = str(st.session_state.secret)` before calling `check_guess(guess_int, secret)`, so an `int` guess was being compared to a `str` secret. In Python 3 that raises `TypeError` on `>`, which `check_guess`'s `except TypeError` branch quietly caught by converting the guess to a string too and comparing lexicographically — so `"9" > "50"` evaluates `True` because `"9"` sorts after `"5"` character-by-character. That explanation was correct: I verified it by removing the `str()` conversion in app.py and confirming the same guess (9 vs 50) reliably showed "Too Low" across many attempts, both in the running app and in `check_guess(9, 50) == "Too Low"` at a Python prompt.
+
+**A suggestion I didn't accept as written:** When I asked Claude to fix the `check_guess` function, its first draft kept the original return shape of `(outcome, message)` — a tuple of the result and the display string. That's a reasonable design on its own, but it conflicted with the starter tests in `tests/test_game_logic.py`, which already assert `check_guess(50, 50) == "Win"` (a plain string). Keeping the tuple would have meant either rewriting the given tests (which the instructions didn't ask me to do) or living with tests that fail even after the "fix." Instead I asked Claude to change `check_guess` to return only the outcome string and move the message lookup into a small `get_hint_message(outcome)` helper that `app.py` calls separately. I verified this version by running `pytest`, which passed the original three starter tests unmodified, and by confirming the hint text still displayed correctly in the running app.
 
 ---
 
 ## 3. Debugging and testing your fixes
 
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
+I considered a bug "really fixed" only when two things were both true: the automated tests passed, and I could no longer reproduce the original symptom by hand in the running app for several different inputs (not just the one example from the bug log). For the scoring bug, I ran the app, deliberately submitted "Too High" guesses on both even and odd attempt numbers, and confirmed the score dropped by 5 every time instead of increasing on even attempts. For the "New Game" bug, I played a full game to a win, clicked "New Game," and confirmed I got a fresh round instead of being stuck on the "You already won" screen. On the automated side, I ran `pytest tests/test_game_logic.py -v` after each fix; before the refactor all three starter tests failed with `NotImplementedError` (since `logic_utils.py` was still stubs), and after moving the real logic in and fixing the two bugs, all 13 tests (3 starter + 10 new) passed. AI helped me design the new tests: I described each bug and asked Claude to suggest a regression test for it (for example, "write a test that would have caught the Too-High scoring bug"), and it proposed asserting `update_score(100, "Too High", attempt_number=2) == 95`, which directly encodes the fixed behavior and would fail again if the bug ever came back.
 
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
-- How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+Streamlit doesn't run like a normal desktop or web app that waits and reacts to individual events — instead, every time you click a button or type in a box, Streamlit throws away the current run and re-executes the *entire* script from top to bottom, like restarting the file. That's why plain Python variables are useless for remembering anything between clicks: a variable like `attempts = 0` written directly in the script would just get reset to `0` on every rerun. `st.session_state` is Streamlit's workaround — it's a dictionary-like object that survives across reruns for the same browser session, so anything you truly want to persist (the secret number, the score, how many attempts have been used) has to live there instead of in a normal variable. This project's "New Game" bug was a great illustration of that: it's not enough to reset *some* of the session state keys, because whatever you forget (like `status`) will still be sitting there on the next rerun as if nothing happened.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
+One habit I want to keep is writing a small regression test *immediately* after fixing a bug, using the exact numbers from the bug report, before moving on to the next issue — it turns "I think this is fixed" into something checkable, and it means the bug can never silently come back without a test failing. One thing I'd do differently next time is ask the AI for its reasoning *before* accepting a code change, rather than after — for the `check_guess` return-type issue, I could have caught the tuple-vs-string mismatch sooner if I'd asked "will this still satisfy the existing tests?" as part of the original prompt instead of noticing the conflict after the fact. Overall, this project changed how I think about AI-generated code: it can look complete and even syntactically correct while quietly contradicting its own tests or mixing incompatible ideas (like a secret number that's sometimes an int and sometimes a string), so I can't treat "the AI wrote it" as equivalent to "it works" — I have to actually run it, play with it, and read the diff line by line.

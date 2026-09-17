@@ -1,73 +1,13 @@
 import random
 import streamlit as st
 
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-
-def check_guess(guess, secret):
-    # FIXME: Logic breaks here - secret is sometimes an int and sometimes a
-    # str (see the caller below), which pushes this into the TypeError
-    # fallback and produces wrong Too High/Too Low hints.
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
-        else:
-            return "Too Low", "📉 Go LOWER!"
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
-
-
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        # FIXME: Logic breaks here - a wrong "Too High" guess should always
-        # lose points, but this adds points on even attempt numbers instead.
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+from logic_utils import (
+    get_range_for_difficulty,
+    parse_guess,
+    check_guess,
+    get_hint_message,
+    update_score,
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -98,7 +38,10 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    # FIX: was initialized to 1, which made "Attempts left" undercount by
+    # one before the player had even guessed. Verified by checking the
+    # sidebar counter on a fresh game: it now starts at the full limit.
+    st.session_state.attempts = 0
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -112,7 +55,7 @@ if "history" not in st.session_state:
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -137,11 +80,16 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
-    # FIXME: Logic breaks here - status/score/history never get reset, so
-    # the "already won"/"game over" branch below traps the player forever,
-    # and the new secret ignores the selected difficulty's range.
+    # FIX: status/score/history were never reset here, so the "already
+    # won"/"game over" branch below trapped the player forever, and the
+    # new secret ignored the selected difficulty's range. Fixed with
+    # Claude in agent mode; verified by winning a game, clicking New Game,
+    # and confirming a fresh round actually starts.
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -163,12 +111,12 @@ if submit:
     else:
         st.session_state.history.append(guess_int)
 
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
-
-        outcome, message = check_guess(guess_int, secret)
+        # FIX: this used to alternate the secret between int and str every
+        # other attempt before comparing, which is what broke the hints.
+        # The secret passed to check_guess is now always the plain int
+        # stored in session state.
+        outcome = check_guess(guess_int, st.session_state.secret)
+        message = get_hint_message(outcome)
 
         if show_hint:
             st.warning(message)
