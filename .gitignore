@@ -41,3 +41,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Agent run logs and traces (sample evidence lives in assets/)
+logs/
+*.bak

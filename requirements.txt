@@ -1,3 +1,5 @@
 streamlit>=1.21.0
 altair<5
 pytest
+# Optional: only needed for the Claude backend (set ANTHROPIC_API_KEY to enable it).
+anthropic>=2.0
