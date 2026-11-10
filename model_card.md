@@ -33,7 +33,7 @@ Run with `python evaluate.py --compare` (offline backend, deterministic). Full t
 | RAG, pattern docs only | 10/11 | 8/8 | 8/8 | 1 | 3.4 |
 | No retrieval (blind search over all repairs) | 3/11 | 8/8 | 0/8 | 2 | 10.6 |
 
-The 11 cases cover 7 single-bug cases, 1 three-bug case (the original Module 1 glitches combined), an already-correct module (the fixed Module 1 `logic_utils.py`), a dangerous input that must be refused, and a requested feature that the agent should not invent (it must hand that one to a human). There are also 38 pytest tests: unit tests for retrieval, repairs, and guardrails; end-to-end agent runs; and Claude-backend tests that use a fake client, so they need no network.
+The 11 cases cover 7 single-bug cases, 1 three-bug case (the original Module 1 glitches combined), an already-correct module (the fixed Module 1 `logic_utils.py`), a dangerous input that must be refused, and a requested feature that the agent should not invent (it must hand that one to a human). There are also 39 pytest tests: unit tests for retrieval, repairs, and guardrails; end-to-end agent runs; and Claude-backend tests that use a fake client, so they need no network.
 
 ## Limitations and biases
 
@@ -44,6 +44,17 @@ The 11 cases cover 7 single-bug cases, 1 three-bug case (the original Module 1 g
 - **Confidence is a heuristic, not a calibrated probability.** The weights were chosen by hand and checked on 11 cases. That is far too few to claim calibration.
 - **Claude backend not exercised in the committed evidence.** The committed results use the offline backend because no API key was available when they were generated. The Claude path is covered by tests with a fake client, but its real-world accuracy has not been measured here.
 - **The sandbox is not a security boundary.** It isolates the user's files, not the machine. The static banned-import check is a coarse filter that a determined attacker could get around (for example with `getattr` tricks).
+
+## Future improvements
+
+Each item below answers one of the limitations above.
+
+- **Measure the Claude backend for real.** Run `evaluate.py` with an API key and compare Claude against the offline planner on the same 11 cases, including how often its self-rated confidence matches the verified outcome.
+- **Retrieval that understands synonyms.** Add embedding search next to BM25 (hybrid retrieval), so a symptom like "points went the wrong way" still finds the score-sign pattern.
+- **Prefer the better-explained fix.** Instead of greedily keeping the candidate that turns the most tests green, score candidates by tests *and* retrieval support together, which would have avoided the wrong-but-green patch in the patterns-only run.
+- **Catch weak test suites.** Use mutation testing to check whether the user's tests can tell a correct patch from an overfitted one, and warn when they can't.
+- **More repair strategies and a bigger evaluation set.** Cover more bug shapes than the current 8, and grow the 11 cases so the confidence weights can be checked properly.
+- **A real sandbox.** Run candidate tests in a container with no network or file access outside the temp dir, instead of relying on the static banned-import check.
 
 ## Misuse and prevention
 
@@ -76,6 +87,6 @@ This extension was built with Claude (Claude Code in VS Code) as a pair programm
 
 ## Testing summary
 
-- `python -m pytest`: 38 tests, all passing (14 original game-logic tests + 24 agent tests).
+- `python -m pytest`: 39 tests, all passing (15 game-logic tests + 24 agent tests).
 - `python evaluate.py --compare`: 11/11 cases pass with full RAG. Average confidence on accepted fixes is 0.99. Retrieval hit@1 is 8/8 and recall is 1.0 on the fixable cases.
 - What didn't work: the patterns-only configuration produced a wrong-but-green patch on the three-bug case, and blind search produced two. The greedy search has no way to prefer the fix that is better *explained*, so I rely on retrieval and the human-review threshold to catch this.

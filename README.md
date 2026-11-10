@@ -52,7 +52,7 @@ flowchart LR
 | Sandbox | `glitch_agent/sandbox.py` | Copies the module + tests into a temp dir and runs pytest in a subprocess with a 30 s timeout. |
 | Guardrails | `glitch_agent/guardrails.py` | **Input:** size, syntax, banned imports/calls (`os`, `subprocess`, `eval`, `open`, ...), and the tests must import the target. **Patch:** must parse, add no banned ops, delete no functions, and change ≤ 20 lines. |
 | Interfaces | `investigate.py`, `pages/1_Glitch_Agent.py` | CLI and Streamlit page (runs alongside the original game in `app.py`). |
-| Evaluation | `evaluate.py`, `eval/cases/`, `tests/` | 11 scenario cases with expected outcomes, RAG ablations, and 38 pytest tests. |
+| Evaluation | `evaluate.py`, `eval/cases/`, `tests/` | 11 scenario cases with expected outcomes, RAG ablations, and 39 pytest tests. |
 
 **Where humans and testing come in:** the user's own tests are the oracle for every candidate. The evaluation harness checks the agent's *behaviour* (fix, refuse, or escalate). And a human makes the final call on every patch: nothing is written without `--apply`, and only results with confidence ≥ 0.75 can be applied.
 
@@ -211,18 +211,19 @@ $ python investigate.py eval/cases/11_missing_feature/game.py --tests eval/cases
 ```text
 $ python -m pytest -v
 ...
-tests/test_game_logic.py::test_too_high_always_deducts_points PASSED     [ 76%]
-tests/test_game_logic.py::test_too_low_deducts_points PASSED             [ 78%]
-tests/test_game_logic.py::test_win_score_uses_attempt_number_without_off_by_one PASSED [ 81%]
-tests/test_game_logic.py::test_win_score_has_floor_of_ten PASSED         [ 84%]
-tests/test_game_logic.py::test_parse_guess_rejects_empty_input PASSED    [ 86%]
+tests/test_game_logic.py::test_too_high_always_deducts_points PASSED     [ 74%]
+tests/test_game_logic.py::test_too_low_deducts_points PASSED             [ 76%]
+tests/test_game_logic.py::test_win_score_rewards_attempts_left PASSED    [ 79%]
+tests/test_game_logic.py::test_win_on_last_attempt_still_scores_positive PASSED [ 82%]
+tests/test_game_logic.py::test_win_score_never_drops_below_base PASSED   [ 84%]
+tests/test_game_logic.py::test_parse_guess_rejects_empty_input PASSED    [ 87%]
 tests/test_game_logic.py::test_parse_guess_rejects_non_numeric_string PASSED [ 89%]
 tests/test_game_logic.py::test_parse_guess_accepts_negative_numbers PASSED [ 92%]
 tests/test_game_logic.py::test_parse_guess_accepts_decimal_strings PASSED [ 94%]
 tests/test_game_logic.py::test_parse_guess_accepts_very_large_numbers PASSED [ 97%]
 tests/test_game_logic.py::test_range_for_easy_difficulty PASSED          [100%]
 
-============================= 38 passed in 24.90s =============================
+============================= 39 passed in 26.38s =============================
 ```
 
 **Evaluation harness:** `python evaluate.py --compare` runs all 11 cases under 3 retrieval configurations. A case passes only if the agent reaches the *expected behaviour*: fix it with the right pattern, refuse it, report "no bug", or escalate to a human. Per-case table: [eval/results.md](eval/results.md).
@@ -271,7 +272,7 @@ What I learned: green tests are necessary but not sufficient. The evaluator has 
 
 ## 🪞 Reflection
 
-Module 1 taught me not to trust AI-written code just because it looks finished. Building this agent taught me the same thing from the other side: when *I* am the one building the AI, my job is to design the checks that keep it honest. The most valuable result in this project is the wrong-but-green patch, because it showed that "the tests pass" and "the bug is fixed" are different claims. I also learned that retrieval is not just a way to give a model more information. It is a way to make the system *justify* its output with precedent, and that justification can be measured. Responsible-AI reflection, limitations, and AI-collaboration notes: **[model_card.md](model_card.md)**. Agent reasoning traces: **[ai_interactions.md](ai_interactions.md)**.
+Module 1 taught me not to trust AI-written code just because it looks finished. Building this agent taught me the same thing from the other side: when *I* am the one building the AI, my job is to design the checks that keep it honest. The most valuable result in this project is the wrong-but-green patch, because it showed that "the tests pass" and "the bug is fixed" are different claims. I also learned that retrieval is not just a way to give a model more information. It is a way to make the system *justify* its output with precedent, and that justification can be measured. Responsible-AI reflection, limitations, future improvements, and AI-collaboration notes: **[model_card.md](model_card.md)**. Agent reasoning traces: **[ai_interactions.md](ai_interactions.md)**.
 
 ### Portfolio note: what this project says about me as an AI engineer
 
@@ -282,7 +283,7 @@ I build AI systems that have to earn trust: they show their evidence, measure th
 ## 📁 Repository map
 
 ```
-app.py                     original Module 1 game (Streamlit) + link to the agent page
+app.py                     the fixed Module 1 game (Streamlit), restyled + link to the agent page
 logic_utils.py             fixed Module 1 game logic
 pages/1_Glitch_Agent.py    Streamlit UI for the agent
 investigate.py             CLI
