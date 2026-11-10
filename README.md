@@ -16,7 +16,7 @@ It never edits your file on its own. If it can't *prove* a fix with your tests, 
 
 ## 📦 Base project
 
-This extends my **Game Glitch Investigator** from AI110 Module 1 ([original repo](https://github.com/Pamzlerinz/ai110-module1show-gameglitchinvestigator-starter)).
+This extends my **Game Glitch Investigator** from AI110 Module 1 ([original repo](https://github.com/Pamzlerinz/ai110-module1show-gameglitchinvestigator-starter)). The Module 1 version is on that repo's `main` branch; this project is on its `applied-ai-system` branch.
 
 The original was a Streamlit number-guessing game, deliberately written with AI-introduced bugs: hints pointed the wrong way, the secret flipped between `int` and `str`, "New Game" left the player stuck, and the score went *up* on wrong guesses. My job was to find and fix those bugs by hand, move the logic into `logic_utils.py`, and lock the fixes in with 14 pytest tests. The fixed game is still here (`app.py`). Its bug log became the agent's case-history knowledge source, and its fixed logic is one of the evaluation cases.
 
@@ -63,8 +63,8 @@ flowchart LR
 Requires Python 3.10+ (developed on 3.14, Windows 11).
 
 ```bash
-git clone https://github.com/Pamzlerinz/applied-ai-system-project.git
-cd applied-ai-system-project
+git clone -b applied-ai-system https://github.com/Pamzlerinz/ai110-module1show-gameglitchinvestigator-starter.git
+cd ai110-module1show-gameglitchinvestigator-starter
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
