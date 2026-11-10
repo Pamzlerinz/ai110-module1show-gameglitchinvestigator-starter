@@ -102,6 +102,15 @@ CLI flags: `--backend auto|offline|claude`, `--no-retrieval` (ablation), `--trac
 
 All outputs below come from real runs with the offline backend. The full logs are in [assets/sample_runs/](assets/sample_runs/).
 
+**Execution evidence at a glance**
+
+| What a grader needs to see | Where it is |
+|---|---|
+| End-to-end runs on different inputs | Sample interactions 1–4 below: four different buggy modules and symptoms, each with its command and full output |
+| AI feature behaviour (RAG + agent) | Interaction 1 (retrieved patterns and the step-by-step agent trace) and interaction 2 (three planning iterations, retrieving again each time) |
+| Reliability and guardrails | Interaction 3 (dangerous input refused), interaction 4 (missing feature handed to a human), and the [Testing summary](#-testing-summary-reliability-and-guardrail-results) (evaluation harness + pytest) |
+| Clear outputs per case | Every run shows its status, confidence, test counts and diff; per-case evaluation table in [eval/results.md](eval/results.md) |
+
 ### 1. A single bug, with the full agent trace (RAG → patch → verify)
 
 ```text
@@ -275,6 +284,8 @@ What I learned: green tests are necessary but not sufficient. The evaluator has 
 Module 1 taught me not to trust AI-written code just because it looks finished. Building this agent taught me the same thing from the other side: when *I* am the one building the AI, my job is to design the checks that keep it honest. The most valuable result in this project is the wrong-but-green patch, because it showed that "the tests pass" and "the bug is fixed" are different claims. I also learned that retrieval is not just a way to give a model more information. It is a way to make the system *justify* its output with precedent, and that justification can be measured. Responsible-AI reflection, limitations, future improvements, and AI-collaboration notes: **[model_card.md](model_card.md)**. Agent reasoning traces: **[ai_interactions.md](ai_interactions.md)**.
 
 ### Portfolio note: what this project says about me as an AI engineer
+
+**Code:** https://github.com/Pamzlerinz/ai110-module1show-gameglitchinvestigator-starter/tree/applied-ai-system
 
 I build AI systems that have to earn trust: they show their evidence, measure themselves, and know when to hand a problem to a person. In this project I treated the AI's answers as hypotheses to verify, and I reported the uncomfortable result (a passing-but-wrong patch) instead of hiding it.
 
