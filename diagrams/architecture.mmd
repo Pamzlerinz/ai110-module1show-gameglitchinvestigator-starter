@@ -1,0 +1,50 @@
+%% Glitch Investigator: system architecture
+flowchart TD
+    U["👤 User<br/>buggy module + pytest file + symptom"] --> UI{"Entry point"}
+    UI -->|CLI| CLI["investigate.py"]
+    UI -->|Web| ST["Streamlit page<br/>pages/1_Glitch_Agent.py"]
+    CLI --> G1
+    ST --> G1
+
+    subgraph AGENT["GlitchAgent loop (glitch_agent/agent.py)"]
+        G1["🛡️ Input guardrails<br/>size, syntax, banned imports/calls,<br/>tests must import target"] -->|refuse| REP
+        G1 -->|ok| OBS["🧪 Observe<br/>run tests in sandbox"]
+        OBS -->|all pass| REP
+        OBS -->|failures| RET["🔎 Retrieve<br/>BM25 over knowledge base<br/>query = symptom + failing tests"]
+        RET --> PRO["💡 Propose patches"]
+        PRO --> G2["🛡️ Patch guardrails<br/>parses, no new banned ops,<br/>no deleted defs, ≤20 lines"]
+        G2 -->|rejected| PRO
+        G2 --> VER["🧪 Verify<br/>run tests on candidate<br/>reject regressions"]
+        VER -->|improved, still failing| RET
+        VER -->|all pass / stuck / budget| CONF["📊 Confidence score<br/>pass ratio + retrieval support<br/>+ patch size (+ model self-rating)"]
+        CONF --> REP["📝 Report + JSON trace<br/>status, diagnosis, diff"]
+    end
+
+    subgraph KB["Knowledge base (RAG sources)"]
+        K1["patterns/*.md<br/>10 bug patterns + repair recipe"]
+        K2["case_history.md<br/>real bugs from Module 1"]
+    end
+    K1 --> RET
+    K2 --> RET
+
+    subgraph BACK["Reasoning backends"]
+        B1["Claude (claude-opus-5-5)<br/>structured JSON: diagnosis, patch, confidence"]
+        B2["Offline heuristic planner<br/>runs repair strategies of retrieved patterns"]
+    end
+    PRO <--> B1
+    PRO <--> B2
+    B1 -. API error / refusal .-> B2
+
+    SB[("Sandbox<br/>temp dir + pytest subprocess<br/>30s timeout")]
+    OBS --- SB
+    VER --- SB
+
+    REP --> H["👤 Human review<br/>reads diff + confidence,<br/>chooses --apply / download"]
+    REP --> LOG[("logs/glitch_agent.log<br/>logs/traces/*.json")]
+
+    subgraph EVAL["Reliability testing"]
+        E1["evaluate.py<br/>11 cases incl. refuse + human-review<br/>RAG ablations"]
+        E2["pytest tests/<br/>unit + integration + fake-Claude tests"]
+    end
+    E1 --> AGENT
+    E2 --> AGENT

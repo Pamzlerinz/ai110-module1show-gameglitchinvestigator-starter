@@ -1,0 +1,7 @@
+{
+  "symptom": "After I win, clicking New Game still says You already won. The game is stuck.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "incomplete-state-reset"
+  ]
+}

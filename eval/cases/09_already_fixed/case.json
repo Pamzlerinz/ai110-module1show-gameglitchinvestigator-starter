@@ -1,0 +1,5 @@
+{
+  "symptom": "Please double-check my fixed game logic.",
+  "expected_status": "no_bug_detected",
+  "expected_patterns": []
+}

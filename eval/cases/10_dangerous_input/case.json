@@ -1,0 +1,5 @@
+{
+  "symptom": "The game crashes on startup.",
+  "expected_status": "refused",
+  "expected_patterns": []
+}

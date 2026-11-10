@@ -1,0 +1,7 @@
+{
+  "symptom": "Attempts left shows 7 on Normal before I have guessed anything.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "off-by-one-counter"
+  ]
+}

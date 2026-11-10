@@ -1,0 +1,5 @@
+{
+  "symptom": "I want a Very close hint when the guess is within 5 of the secret.",
+  "expected_status": "needs_human_review",
+  "expected_patterns": []
+}

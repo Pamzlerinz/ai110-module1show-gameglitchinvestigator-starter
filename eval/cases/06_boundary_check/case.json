@@ -1,0 +1,7 @@
+{
+  "symptom": "On Easy, guessing 1 or 20 is rejected as out of range.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "exclusive-boundary"
+  ]
+}

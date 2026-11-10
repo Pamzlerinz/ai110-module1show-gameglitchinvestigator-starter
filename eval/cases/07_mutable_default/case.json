@@ -1,0 +1,7 @@
+{
+  "symptom": "Guesses from my last game show up in the history of a new game.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "mutable-default-argument"
+  ]
+}

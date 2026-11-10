@@ -1,0 +1,7 @@
+{
+  "symptom": "A guess of 9 against a secret of 50 sometimes says Too High, but only on some attempts.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "type-mismatch-comparison"
+  ]
+}

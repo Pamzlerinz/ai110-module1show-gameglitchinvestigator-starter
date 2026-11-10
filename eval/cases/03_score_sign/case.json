@@ -1,0 +1,7 @@
+{
+  "symptom": "My score went up after a wrong guess.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "score-sign-error"
+  ]
+}

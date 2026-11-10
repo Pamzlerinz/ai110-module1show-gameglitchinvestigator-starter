@@ -1,0 +1,9 @@
+{
+  "symptom": "The original glitchy game: hints lie, score goes up when I am wrong, and 9 vs 50 says Too High.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "inverted-hint",
+    "score-sign-error",
+    "type-mismatch-comparison"
+  ]
+}

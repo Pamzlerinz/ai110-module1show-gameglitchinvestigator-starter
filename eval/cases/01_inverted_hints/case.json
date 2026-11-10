@@ -1,0 +1,7 @@
+{
+  "symptom": "The hint says go higher even though my guess was way too high.",
+  "expected_status": "fixed",
+  "expected_patterns": [
+    "inverted-hint"
+  ]
+}
