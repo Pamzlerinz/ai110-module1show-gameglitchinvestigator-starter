@@ -1,0 +1,8 @@
+[theme]
+# Dark theme so the page never shows a bright white background.
+base = "dark"
+# Accent color for buttons, the progress bar and focused inputs.
+primaryColor = "#8B5CF6"
+backgroundColor = "#0F1117"
+secondaryBackgroundColor = "#1A1D29"
+textColor = "#E5E7EB"

@@ -14,6 +14,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from glitch_agent import GlitchAgent, make_backend, setup_logging  # noqa: E402
+from glitch_agent.backends import ClaudeBackend  # noqa: E402
 
 CASES = Path(__file__).resolve().parent.parent / "eval" / "cases"
 
@@ -26,6 +27,11 @@ setup_logging()
 with st.sidebar:
     backend_choice = st.radio("Reasoning backend", ["auto", "offline", "claude"],
                               help="auto uses Claude when ANTHROPIC_API_KEY is set, otherwise the offline planner.")
+    if ClaudeBackend.available():
+        st.caption("✅ Claude API key found: auto will use Claude.")
+    else:
+        st.caption("No Claude API key set: auto will use the offline planner, "
+                   "and the claude option won't run.")
     use_retrieval = st.checkbox("Use knowledge-base retrieval (RAG)", value=True)
 
 cases = sorted(p.name for p in CASES.iterdir() if p.is_dir())

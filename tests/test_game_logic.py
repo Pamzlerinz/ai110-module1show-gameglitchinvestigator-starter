@@ -42,13 +42,24 @@ def test_too_high_always_deducts_points():
 def test_too_low_deducts_points():
     assert update_score(current_score=100, outcome="Too Low", attempt_number=1) == 95
 
-def test_win_score_uses_attempt_number_without_off_by_one():
-    # First successful guess (attempt_number=1) should award 90 points,
-    # not 80 (the old formula subtracted an extra 10 due to a +1 bug).
-    assert update_score(current_score=0, outcome="Win", attempt_number=1) == 90
+def test_win_score_rewards_attempts_left():
+    # A win is 100 points plus 10 for each attempt the player had left.
+    # Winning on attempt 1 of 8 leaves 7 attempts: 100 + 70 = 170.
+    assert update_score(current_score=0, outcome="Win", attempt_number=1, attempt_limit=8) == 170
+    assert update_score(current_score=0, outcome="Win", attempt_number=3, attempt_limit=5) == 120
 
-def test_win_score_has_floor_of_ten():
-    assert update_score(current_score=0, outcome="Win", attempt_number=50) == 10
+def test_win_on_last_attempt_still_scores_positive():
+    # Old formula: winning on attempt 8 after 7 misses totalled -15.
+    # 7 misses (-35) plus a last-attempt win (+100) must now be positive.
+    score = 0
+    for attempt in range(1, 8):
+        score = update_score(score, "Too Low", attempt, attempt_limit=8)
+    score = update_score(score, "Win", 8, attempt_limit=8)
+    assert score == 65
+
+def test_win_score_never_drops_below_base():
+    # Attempts past the limit never reduce the win below the 100 base.
+    assert update_score(current_score=0, outcome="Win", attempt_number=50, attempt_limit=8) == 100
 
 
 # --- Edge-case tests for parse_guess (Challenge 1) ---

@@ -69,13 +69,20 @@ def get_hint_message(outcome: str):
     return HINT_MESSAGES.get(outcome, "")
 
 
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    """Update score based on outcome and attempt number."""
+def update_score(current_score: int, outcome: str, attempt_number: int, attempt_limit: int = 8):
+    """Update score based on outcome and attempt number.
+
+    A win is worth 100 points plus 10 for every attempt the player had left,
+    so any win scores well above zero and faster wins score more. A wrong
+    guess costs 5 points.
+
+    # CHANGE: the old win formula (100 - 10 * attempt_number, floor 10)
+    # punished slow wins twice: each miss cost 5 *and* shrank the bonus by
+    # 10, so winning on the last attempt could leave a negative total.
+    """
     if outcome == "Win":
-        points = 100 - 10 * attempt_number
-        if points < 10:
-            points = 10
-        return current_score + points
+        attempts_left = max(attempt_limit - attempt_number, 0)
+        return current_score + 100 + 10 * attempts_left
 
     # FIX: "Too High" used to add points on even attempt numbers instead of
     # always deducting for a wrong guess. Both wrong outcomes now behave the

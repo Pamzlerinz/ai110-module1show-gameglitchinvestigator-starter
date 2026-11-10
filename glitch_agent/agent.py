@@ -53,7 +53,17 @@ class Result:
 
 
 def make_backend(choice: str = "auto"):
-    if choice == "claude" or (choice == "auto" and ClaudeBackend.available()):
+    if choice == "claude":
+        # Fail early with a clear message instead of a TypeError from deep
+        # inside the SDK on the first API call.
+        if not ClaudeBackend.available():
+            raise RuntimeError(
+                "the Claude backend needs ANTHROPIC_API_KEY (or ANTHROPIC_AUTH_TOKEN) "
+                "set and the anthropic package installed. Set the key, or use the "
+                "offline backend instead."
+            )
+        return ClaudeBackend()
+    if choice == "auto" and ClaudeBackend.available():
         return ClaudeBackend()
     return HeuristicBackend()
 
