@@ -1,0 +1,142 @@
+{
+  "status": "fixed",
+  "message": "All tests pass after 1 verified change(s).",
+  "backend": "offline-heuristic",
+  "confidence": 1.0,
+  "diagnosis": [
+    "Mutable default argument leaks state between games: A function uses a mutable default argument such as history=[] or cache={}."
+  ],
+  "patterns_used": [
+    "mutable-default-argument"
+  ],
+  "retrieved": [
+    {
+      "pattern": "mutable-default-argument",
+      "support": 1.0
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.274
+    }
+  ],
+  "tests_before": "1/2 passed",
+  "tests_after": "2/2 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": "def record_guess(guess, history=None):\n    \"\"\"Append a guess to the game's history and return it.\"\"\"\n    if history is None:\n        history = []\n    history.append(guess)\n    return history\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -1,4 +1,6 @@\n-def record_guess(guess, history=[]):\n+def record_guess(guess, history=None):\n     \"\"\"Append a guess to the game's history and return it.\"\"\"\n+    if history is None:\n+        history = []\n     history.append(guess)\n     return history\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\07_mutable_default\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\07_mutable_default\\test_game.py",
+      "symptom": "Guesses from my last game show up in the history of a new game.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "1/2 passed",
+      "failing": {
+        "test_history_not_shared_between_games": "assert [5, 7] ==..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "Guesses from my last game show up in the history of a new game. test_history_not_shared_between_games assert [5, 7] ==...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "mutable-default-argument",
+          "heading": "Mutable default argument leaks state between games: Symptoms",
+          "score": 19.0
+        },
+        {
+          "source": "patterns",
+          "pattern": "mutable-default-argument",
+          "heading": "Mutable default argument leaks state between games: Fix recipe",
+          "score": 8.51
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Symptoms",
+          "score": 5.21
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Root cause",
+          "score": 5.05
+        },
+        {
+          "source": "patterns",
+          "pattern": "mutable-default-argument",
+          "heading": "Mutable default argument leaks state between games: Root cause",
+          "score": 4.68
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Fix recipe",
+          "score": 4.18
+        }
+      ],
+      "patterns": [
+        "mutable-default-argument (1.0)",
+        "incomplete-state-reset (0.274)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 1,
+      "candidates": [
+        "[mutable-default-argument] record_guess(): default history=[] -> None"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "record_guess(): default history=[] -> None",
+      "pattern": "mutable-default-argument",
+      "result": "2/2 passed"
+    },
+    {
+      "step": 7,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "mutable-default-argument",
+      "change": "record_guess(): default history=[] -> None",
+      "tests": "2/2 passed"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "fixed",
+      "confidence": 1.0,
+      "message": "All tests pass after 1 verified change(s)."
+    }
+  ],
+  "trace_file": null
+}

@@ -1,0 +1,24 @@
+$ python investigate.py eval/cases/03_score_sign/game.py --tests eval/cases/03_score_sign/test_game.py --symptom "My score went up after a wrong guess." --no-retrieval
+
+🧑‍🔧 STATUS: needs_human_review   confidence=0.7
+   Tests pass, but confidence 0.7 is below 0.75; review the diff carefully.
+   backend: offline-heuristic
+   tests: 3/4 passed -> 4/4 passed   (iterations=1, candidates tested=23)
+   retrieved patterns: exclusive-boundary (0.0), incomplete-state-reset (0.0), inverted-hint (0.0), mutable-default-argument (0.0), off-by-one-counter (0.0)
+   diagnosis: Score sign error on wrong guesses: An arithmetic operator has the wrong sign: a penalty is written as current_score + 5 instead of current_score - 5, often inside one branch of an if statement on attempt_number parity.
+
+--- proposed patch --------------------------------------------------
+--- a/game.py
++++ b/game.py
+@@ -7,7 +7,7 @@
+ 
+     if outcome == "Too High":
+         if attempt_number % 2 == 0:
+-            return current_score + 5
++            return current_score - 5
+         return current_score - 5
+ 
+     if outcome == "Too Low":
+
+   full trace saved to logs\traces\20261110-105251-969236_03_score_sign_game.json
+(exit code 1)

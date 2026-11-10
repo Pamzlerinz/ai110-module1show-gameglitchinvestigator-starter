@@ -1,0 +1,128 @@
+{
+  "status": "needs_human_review",
+  "message": "No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate.",
+  "backend": "offline-heuristic",
+  "confidence": 0.0,
+  "diagnosis": [],
+  "patterns_used": [],
+  "retrieved": [
+    {
+      "pattern": "inverted-hint",
+      "support": 1.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.844
+    }
+  ],
+  "tests_before": "2/3 passed",
+  "tests_after": "2/3 passed",
+  "still_failing": [
+    "test_very_close_hint"
+  ],
+  "iterations": 1,
+  "candidates_tried": 0,
+  "patched_source": null,
+  "diff": "",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "eval\\cases\\11_missing_feature\\game.py",
+      "tests": "eval\\cases\\11_missing_feature\\test_game.py",
+      "symptom": "I want a Very close hint when the guess is within 5 of the secret.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "2/3 passed",
+      "failing": {
+        "test_very_close_hint": "AssertionError: assert '' == 'Ver..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "I want a Very close hint when the guess is within 5 of the secret. test_very_close_hint AssertionError: assert '' == 'Ver...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Symptoms",
+          "score": 7.09
+        },
+        {
+          "source": "case_history",
+          "pattern": "inverted-hint",
+          "heading": "Hint said \"Go HIGHER\" when the guess was too high",
+          "score": 6.62
+        },
+        {
+          "source": "patterns",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Type mismatch in comparison (str vs int): Symptoms",
+          "score": 5.98
+        },
+        {
+          "source": "case_history",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Guess of 9 said \"Too High\" against a secret of 50",
+          "score": 5.64
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Root cause",
+          "score": 4.73
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Fix recipe",
+          "score": 4.63
+        }
+      ],
+      "patterns": [
+        "inverted-hint (1.0)",
+        "type-mismatch-comparison (0.844)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 0,
+      "candidates": []
+    },
+    {
+      "step": 6,
+      "action": "stuck",
+      "reason": "no candidate improved the test results without regressions"
+    },
+    {
+      "step": 7,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.0,
+      "message": "No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate."
+    }
+  ],
+  "trace_file": null
+}

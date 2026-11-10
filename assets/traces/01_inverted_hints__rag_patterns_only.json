@@ -1,0 +1,154 @@
+{
+  "status": "fixed",
+  "message": "All tests pass after 1 verified change(s).",
+  "backend": "offline-heuristic",
+  "confidence": 1.0,
+  "diagnosis": [
+    "Inverted hint direction: The outcome labels (\"Too High\", \"Too Low\") are correct but the user-facing messages attached to them are swapped, usually inside a HINT_MESSAGES dictionary or an if/else that returns message strings."
+  ],
+  "patterns_used": [
+    "inverted-hint"
+  ],
+  "retrieved": [
+    {
+      "pattern": "inverted-hint",
+      "support": 1.0
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.352
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.237
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.186
+    }
+  ],
+  "tests_before": "2/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": "HINT_MESSAGES = {\n    \"Win\": \"🎉 Correct!\",\n    \"Too High\": \"📉 Go LOWER!\",\n    \"Too Low\": \"📈 Go HIGHER!\",\n}\n\n\ndef check_guess(guess, secret):\n    if guess == secret:\n        return \"Win\"\n    if guess > secret:\n        return \"Too High\"\n    return \"Too Low\"\n\n\ndef hint_for(guess, secret):\n    return HINT_MESSAGES[check_guess(guess, secret)]\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -1,7 +1,7 @@\n HINT_MESSAGES = {\n     \"Win\": \"🎉 Correct!\",\n-    \"Too High\": \"📈 Go HIGHER!\",\n-    \"Too Low\": \"📉 Go LOWER!\",\n+    \"Too High\": \"📉 Go LOWER!\",\n+    \"Too Low\": \"📈 Go HIGHER!\",\n }\n \n \n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\01_inverted_hints\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\01_inverted_hints\\test_game.py",
+      "symptom": "The hint says go higher even though my guess was way too high.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "2/4 passed",
+      "failing": {
+        "test_hint_tells_player_to_go_lower_when_too_high": "Asser...",
+        "test_hint_tells_player_to_go_higher_when_too_low": "Asser..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "The hint says go higher even though my guess was way too high. test_hint_tells_player_to_go_lower_when_too_high test_hint_tells_player_to_go_higher_when_too_low Asser... Asser...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Symptoms",
+          "score": 54.57
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Fix recipe",
+          "score": 34.97
+        },
+        {
+          "source": "patterns",
+          "pattern": "reversed-comparison",
+          "heading": "Reversed comparison operator: Symptoms",
+          "score": 19.23
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Root cause",
+          "score": 16.17
+        },
+        {
+          "source": "patterns",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Type mismatch in comparison (str vs int): Symptoms",
+          "score": 12.92
+        },
+        {
+          "source": "patterns",
+          "pattern": "score-sign-error",
+          "heading": "Score sign error on wrong guesses: Symptoms",
+          "score": 10.16
+        }
+      ],
+      "patterns": [
+        "inverted-hint (1.0)",
+        "reversed-comparison (0.352)",
+        "type-mismatch-comparison (0.237)",
+        "score-sign-error (0.186)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 2,
+      "candidates": [
+        "[inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s)",
+        "[reversed-comparison] change `>` to `<` in `guess > secret`"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "swap HIGHER/LOWER wording in 2 string literal(s)",
+      "pattern": "inverted-hint",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 7,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "inverted-hint",
+      "change": "swap HIGHER/LOWER wording in 2 string literal(s)",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "fixed",
+      "confidence": 1.0,
+      "message": "All tests pass after 1 verified change(s)."
+    }
+  ],
+  "trace_file": null
+}

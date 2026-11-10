@@ -1,0 +1,337 @@
+{
+  "status": "needs_human_review",
+  "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully.",
+  "backend": "offline-heuristic",
+  "confidence": 0.7,
+  "diagnosis": [
+    "Exclusive boundary check rejects valid edge values: A range check uses strict comparison (low < guess < high) when the range is meant to be inclusive.",
+    "Exclusive boundary check rejects valid edge values: A range check uses strict comparison (low < guess < high) when the range is meant to be inclusive."
+  ],
+  "patterns_used": [
+    "exclusive-boundary",
+    "exclusive-boundary"
+  ],
+  "retrieved": [
+    {
+      "pattern": "exclusive-boundary",
+      "support": 0.0
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.0
+    },
+    {
+      "pattern": "inverted-hint",
+      "support": 0.0
+    },
+    {
+      "pattern": "mutable-default-argument",
+      "support": 0.0
+    },
+    {
+      "pattern": "off-by-one-counter",
+      "support": 0.0
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.0
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.0
+    }
+  ],
+  "tests_before": "2/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 2,
+  "candidates_tried": 21,
+  "patched_source": "def get_range_for_difficulty(difficulty):\n    return {\"Easy\": (1, 20), \"Normal\": (1, 100), \"Hard\": (1, 50)}.get(difficulty, (1, 100))\n\n\ndef is_valid_guess(guess, difficulty):\n    low, high = get_range_for_difficulty(difficulty)\n    return low <= guess <= high\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -4,4 +4,4 @@\n \n def is_valid_guess(guess, difficulty):\n     low, high = get_range_for_difficulty(difficulty)\n-    return low < guess < high\n+    return low <= guess <= high\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\06_boundary_check\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\06_boundary_check\\test_game.py",
+      "symptom": "On Easy, guessing 1 or 20 is rejected as out of range.",
+      "backend": "offline-heuristic",
+      "retrieval": false,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "2/4 passed",
+      "failing": {
+        "test_low_boundary_is_valid": "AssertionError: assert False",
+        "test_high_boundary_is_valid": "AssertionError: assert False"
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "mode": "disabled (blind search over all strategies)",
+      "patterns": [
+        "exclusive-boundary",
+        "incomplete-state-reset",
+        "inverted-hint",
+        "mutable-default-argument",
+        "off-by-one-counter",
+        "reversed-comparison",
+        "score-sign-error",
+        "type-mismatch-comparison"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 20,
+      "candidates": [
+        "[exclusive-boundary] change `<` to `<=` in `low < guess < high`",
+        "[exclusive-boundary] change `<` to `<=` in `low < guess < high`",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2",
+        "[off-by-one-counter] change constant 100 to 99",
+        "[off-by-one-counter] change constant 100 to 101",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2",
+        "[off-by-one-counter] change constant 20 to 19",
+        "[off-by-one-counter] change constant 20 to 21",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "change `<` to `<=` in `low < guess < high`",
+      "pattern": "exclusive-boundary",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 7,
+      "action": "verify",
+      "candidate": "change `<` to `<=` in `low < guess < high`",
+      "pattern": "exclusive-boundary",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 8,
+      "action": "verify",
+      "candidate": "change constant 1 to 0",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 9,
+      "action": "verify",
+      "candidate": "change constant 1 to 2",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 10,
+      "action": "verify",
+      "candidate": "change constant 100 to 99",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 11,
+      "action": "verify",
+      "candidate": "change constant 100 to 101",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 12,
+      "action": "verify",
+      "candidate": "change constant 1 to 0",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 13,
+      "action": "verify",
+      "candidate": "change constant 1 to 2",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 14,
+      "action": "verify",
+      "candidate": "change constant 20 to 19",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 15,
+      "action": "verify",
+      "candidate": "change constant 20 to 21",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 16,
+      "action": "verify",
+      "candidate": "change constant 1 to 0",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 17,
+      "action": "verify",
+      "candidate": "change constant 1 to 2",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 18,
+      "action": "verify",
+      "candidate": "change constant 100 to 99",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 19,
+      "action": "verify",
+      "candidate": "change constant 100 to 101",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 20,
+      "action": "verify",
+      "candidate": "change constant 1 to 0",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 21,
+      "action": "verify",
+      "candidate": "change constant 1 to 2",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 22,
+      "action": "verify",
+      "candidate": "change constant 50 to 49",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 23,
+      "action": "verify",
+      "candidate": "change constant 50 to 51",
+      "pattern": "off-by-one-counter",
+      "result": "2/4 passed"
+    },
+    {
+      "step": 24,
+      "action": "verify",
+      "candidate": "change `<` to `>` in `low < guess < high`",
+      "pattern": "reversed-comparison",
+      "result": "regression: test_middle_is_valid, test_outside_range_is_invalid"
+    },
+    {
+      "step": 25,
+      "action": "verify",
+      "candidate": "change `<` to `>` in `low < guess < high`",
+      "pattern": "reversed-comparison",
+      "result": "regression: test_middle_is_valid, test_outside_range_is_invalid"
+    },
+    {
+      "step": 26,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "exclusive-boundary",
+      "change": "change `<` to `<=` in `low < guess < high`",
+      "tests": "3/4 passed"
+    },
+    {
+      "step": 27,
+      "action": "retrieve",
+      "mode": "disabled (blind search over all strategies)",
+      "patterns": [
+        "exclusive-boundary",
+        "incomplete-state-reset",
+        "inverted-hint",
+        "mutable-default-argument",
+        "off-by-one-counter",
+        "reversed-comparison",
+        "score-sign-error",
+        "type-mismatch-comparison"
+      ]
+    },
+    {
+      "step": 28,
+      "action": "propose",
+      "iteration": 2,
+      "count": 20,
+      "candidates": [
+        "[exclusive-boundary] change `<=` to `<` in `low <= guess < high`",
+        "[exclusive-boundary] change `<` to `<=` in `low <= guess < high`",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2",
+        "[off-by-one-counter] change constant 100 to 99",
+        "[off-by-one-counter] change constant 100 to 101",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2",
+        "[off-by-one-counter] change constant 20 to 19",
+        "[off-by-one-counter] change constant 20 to 21",
+        "[off-by-one-counter] change constant 1 to 0",
+        "[off-by-one-counter] change constant 1 to 2"
+      ]
+    },
+    {
+      "step": 29,
+      "action": "reject",
+      "candidate": "change `<=` to `<` in `low <= guess < high`",
+      "reason": "patch makes no change"
+    },
+    {
+      "step": 30,
+      "action": "verify",
+      "candidate": "change `<` to `<=` in `low <= guess < high`",
+      "pattern": "exclusive-boundary",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 31,
+      "action": "accept",
+      "iteration": 2,
+      "pattern": "exclusive-boundary",
+      "change": "change `<` to `<=` in `low <= guess < high`",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 32,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.7,
+      "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully."
+    }
+  ],
+  "trace_file": null
+}

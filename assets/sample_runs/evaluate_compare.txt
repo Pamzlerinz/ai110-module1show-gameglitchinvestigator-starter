@@ -1,0 +1,46 @@
+
+== config: rag_full ==
+  [PASS] 01_inverted_hints      expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 02_type_mismatch       expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 03_score_sign          expected=fixed               got=fixed               conf=1.0   candidates=4
+  [PASS] 04_attempt_counter     expected=fixed               got=fixed               conf=1.0   candidates=7
+  [PASS] 05_incomplete_reset    expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 06_boundary_check      expected=fixed               got=fixed               conf=1.0   candidates=3
+  [PASS] 07_mutable_default     expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 08_multi_bug           expected=fixed               got=fixed               conf=0.95  candidates=15
+  [PASS] 09_already_fixed       expected=no_bug_detected     got=no_bug_detected     conf=1.0   candidates=0
+  [PASS] 10_dangerous_input     expected=refused             got=refused             conf=0.0   candidates=0
+  [PASS] 11_missing_feature     expected=needs_human_review  got=needs_human_review  conf=0.0   candidates=0
+
+== config: rag_patterns_only ==
+  [PASS] 01_inverted_hints      expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 02_type_mismatch       expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 03_score_sign          expected=fixed               got=fixed               conf=1.0   candidates=4
+  [PASS] 04_attempt_counter     expected=fixed               got=fixed               conf=1.0   candidates=7
+  [PASS] 05_incomplete_reset    expected=fixed               got=fixed               conf=1.0   candidates=1
+  [PASS] 06_boundary_check      expected=fixed               got=fixed               conf=1.0   candidates=3
+  [PASS] 07_mutable_default     expected=fixed               got=fixed               conf=1.0   candidates=1
+  [FAIL] 08_multi_bug           expected=fixed               got=fixed               conf=0.88  candidates=9
+  [PASS] 09_already_fixed       expected=no_bug_detected     got=no_bug_detected     conf=1.0   candidates=0
+  [PASS] 10_dangerous_input     expected=refused             got=refused             conf=0.0   candidates=0
+  [PASS] 11_missing_feature     expected=needs_human_review  got=needs_human_review  conf=0.0   candidates=1
+
+== config: no_retrieval ==
+  [FAIL] 01_inverted_hints      expected=fixed               got=needs_human_review  conf=0.7   candidates=2
+  [FAIL] 02_type_mismatch       expected=fixed               got=needs_human_review  conf=0.7   candidates=5
+  [FAIL] 03_score_sign          expected=fixed               got=needs_human_review  conf=0.7   candidates=23
+  [FAIL] 04_attempt_counter     expected=fixed               got=needs_human_review  conf=0.7   candidates=7
+  [FAIL] 05_incomplete_reset    expected=fixed               got=needs_human_review  conf=0.7   candidates=1
+  [FAIL] 06_boundary_check      expected=fixed               got=needs_human_review  conf=0.7   candidates=21
+  [FAIL] 07_mutable_default     expected=fixed               got=needs_human_review  conf=0.7   candidates=1
+  [FAIL] 08_multi_bug           expected=fixed               got=needs_human_review  conf=0.7   candidates=25
+  [PASS] 09_already_fixed       expected=no_bug_detected     got=no_bug_detected     conf=1.0   candidates=0
+  [PASS] 10_dangerous_input     expected=refused             got=refused             conf=0.0   candidates=0
+  [PASS] 11_missing_feature     expected=needs_human_review  got=needs_human_review  conf=0.0   candidates=2
+
+== summary ==
+  rag_full           passed 11/11 | tests green 8/8 | auto-accepted 8/8 | wrong-pattern fixes 0 | avg confidence 0.99 | avg candidates 4.1 | hit@1 8/8 | recall 1.0
+  rag_patterns_only  passed 10/11 | tests green 8/8 | auto-accepted 8/8 | wrong-pattern fixes 1 | avg confidence 0.98 | avg candidates 3.4 | hit@1 8/8 | recall 1.0
+  no_retrieval       passed 3/11 | tests green 8/8 | auto-accepted 0/8 | wrong-pattern fixes 2 | avg confidence 0 | avg candidates 10.6 | hit@1 n/a | recall n/a
+
+Wrote eval\results.md

@@ -1,0 +1,170 @@
+{
+  "status": "needs_human_review",
+  "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully.",
+  "backend": "offline-heuristic",
+  "confidence": 0.7,
+  "diagnosis": [
+    "Off-by-one in counters and initial values: An integer constant is off by one: an attempts counter initialized to 1, an extra + 1 or - 1 in a bound, or an inclusive limit treated as exclusive."
+  ],
+  "patterns_used": [
+    "off-by-one-counter"
+  ],
+  "retrieved": [
+    {
+      "pattern": "exclusive-boundary",
+      "support": 0.0
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.0
+    },
+    {
+      "pattern": "inverted-hint",
+      "support": 0.0
+    },
+    {
+      "pattern": "mutable-default-argument",
+      "support": 0.0
+    },
+    {
+      "pattern": "off-by-one-counter",
+      "support": 0.0
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.0
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.0
+    }
+  ],
+  "tests_before": "3/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 5,
+  "patched_source": "def check_guess(guess, secret):\n    try:\n        if guess == secret:\n            return \"Win\"\n        if guess > secret:\n            return \"Too High\"\n        return \"Too Low\"\n    except TypeError:\n        g = str(guess)\n        if g == secret:\n            return \"Win\"\n        if g > secret:\n            return \"Too High\"\n        return \"Too Low\"\n\n\ndef play_round(guess, secret, attempt_number):\n    if attempt_number % 3 == 0:\n        secret = str(secret)\n    return check_guess(guess, secret)\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -15,6 +15,6 @@\n \n \n def play_round(guess, secret, attempt_number):\n-    if attempt_number % 2 == 0:\n+    if attempt_number % 3 == 0:\n         secret = str(secret)\n     return check_guess(guess, secret)\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\02_type_mismatch\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\02_type_mismatch\\test_game.py",
+      "symptom": "A guess of 9 against a secret of 50 sometimes says Too High, but only on some attempts.",
+      "backend": "offline-heuristic",
+      "retrieval": false,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "3/4 passed",
+      "failing": {
+        "test_low_guess_on_even_attempt": "AssertionError: assert ..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "mode": "disabled (blind search over all strategies)",
+      "patterns": [
+        "exclusive-boundary",
+        "incomplete-state-reset",
+        "inverted-hint",
+        "mutable-default-argument",
+        "off-by-one-counter",
+        "reversed-comparison",
+        "score-sign-error",
+        "type-mismatch-comparison"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 9,
+      "candidates": [
+        "[exclusive-boundary] change `>` to `>=` in `guess > secret`",
+        "[exclusive-boundary] change `>` to `>=` in `g > secret`",
+        "[off-by-one-counter] change constant 0 to 1",
+        "[off-by-one-counter] change constant 2 to 1",
+        "[off-by-one-counter] change constant 2 to 3",
+        "[reversed-comparison] change `>` to `<` in `guess > secret`",
+        "[reversed-comparison] change `>` to `<` in `g > secret`",
+        "[type-mismatch-comparison] remove `secret = str(secret)` (and its `if attempt_number % 2 == 0` guard)",
+        "[type-mismatch-comparison] replace str(guess) with guess"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "change `>` to `>=` in `guess > secret`",
+      "pattern": "exclusive-boundary",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 7,
+      "action": "verify",
+      "candidate": "change `>` to `>=` in `g > secret`",
+      "pattern": "exclusive-boundary",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 8,
+      "action": "verify",
+      "candidate": "change constant 0 to 1",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_low_guess_on_odd_attempt"
+    },
+    {
+      "step": 9,
+      "action": "verify",
+      "candidate": "change constant 2 to 1",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_low_guess_on_odd_attempt"
+    },
+    {
+      "step": 10,
+      "action": "verify",
+      "candidate": "change constant 2 to 3",
+      "pattern": "off-by-one-counter",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 11,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "off-by-one-counter",
+      "change": "change constant 2 to 3",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 12,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.7,
+      "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully."
+    }
+  ],
+  "trace_file": null
+}

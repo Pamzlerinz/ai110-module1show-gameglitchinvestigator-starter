@@ -1,0 +1,177 @@
+{
+  "status": "fixed",
+  "message": "All tests pass after 1 verified change(s).",
+  "backend": "offline-heuristic",
+  "confidence": 1.0,
+  "diagnosis": [
+    "Score sign error on wrong guesses: An arithmetic operator has the wrong sign: a penalty is written as current_score + 5 instead of current_score - 5, often inside one branch of an if statement on attempt_number parity."
+  ],
+  "patterns_used": [
+    "score-sign-error"
+  ],
+  "retrieved": [
+    {
+      "pattern": "score-sign-error",
+      "support": 1.0
+    },
+    {
+      "pattern": "inverted-hint",
+      "support": 0.392
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.373
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.299
+    }
+  ],
+  "tests_before": "3/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 4,
+  "patched_source": "def update_score(current_score, outcome, attempt_number):\n    if outcome == \"Win\":\n        points = 100 - 10 * attempt_number\n        if points < 10:\n            points = 10\n        return current_score + points\n\n    if outcome == \"Too High\":\n        if attempt_number % 2 == 0:\n            return current_score - 5\n        return current_score - 5\n\n    if outcome == \"Too Low\":\n        return current_score - 5\n\n    return current_score\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -7,7 +7,7 @@\n \n     if outcome == \"Too High\":\n         if attempt_number % 2 == 0:\n-            return current_score + 5\n+            return current_score - 5\n         return current_score - 5\n \n     if outcome == \"Too Low\":\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\03_score_sign\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\03_score_sign\\test_game.py",
+      "symptom": "My score went up after a wrong guess.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "3/4 passed",
+      "failing": {
+        "test_too_high_always_deducts_points": "AssertionError: as..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "My score went up after a wrong guess. test_too_high_always_deducts_points AssertionError: as...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "score-sign-error",
+          "heading": "Score sign error on wrong guesses: Symptoms",
+          "score": 18.49
+        },
+        {
+          "source": "patterns",
+          "pattern": "score-sign-error",
+          "heading": "Score sign error on wrong guesses: Fix recipe",
+          "score": 9.15
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Symptoms",
+          "score": 7.26
+        },
+        {
+          "source": "patterns",
+          "pattern": "reversed-comparison",
+          "heading": "Reversed comparison operator: Symptoms",
+          "score": 6.89
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Symptoms",
+          "score": 5.53
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Fix recipe",
+          "score": 4.97
+        }
+      ],
+      "patterns": [
+        "score-sign-error (1.0)",
+        "inverted-hint (0.392)",
+        "reversed-comparison (0.373)",
+        "incomplete-state-reset (0.299)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 5,
+      "candidates": [
+        "[score-sign-error] change `100 - 10 * attempt_number` to `100 + (10 * attempt_number)`",
+        "[score-sign-error] change `current_score - 5` to `current_score + 5`",
+        "[score-sign-error] change `current_score - 5` to `current_score + 5`",
+        "[score-sign-error] change `current_score + 5` to `current_score - 5`",
+        "[reversed-comparison] change `<` to `>` in `points < 10`"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "change `100 - 10 * attempt_number` to `100 + (10 * attempt_number)`",
+      "pattern": "score-sign-error",
+      "result": "regression: test_win_bonus, test_win_bonus_floor"
+    },
+    {
+      "step": 7,
+      "action": "verify",
+      "candidate": "change `current_score - 5` to `current_score + 5`",
+      "pattern": "score-sign-error",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 8,
+      "action": "verify",
+      "candidate": "change `current_score - 5` to `current_score + 5`",
+      "pattern": "score-sign-error",
+      "result": "regression: test_too_low_deducts_points"
+    },
+    {
+      "step": 9,
+      "action": "verify",
+      "candidate": "change `current_score + 5` to `current_score - 5`",
+      "pattern": "score-sign-error",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 10,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "score-sign-error",
+      "change": "change `current_score + 5` to `current_score - 5`",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 11,
+      "action": "report",
+      "status": "fixed",
+      "confidence": 1.0,
+      "message": "All tests pass after 1 verified change(s)."
+    }
+  ],
+  "trace_file": null
+}

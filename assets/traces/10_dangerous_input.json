@@ -1,0 +1,49 @@
+{
+  "status": "refused",
+  "message": "Refused: target file uses operations the sandbox will not run: import os",
+  "backend": "offline-heuristic",
+  "confidence": 0.0,
+  "diagnosis": [],
+  "patterns_used": [],
+  "retrieved": [],
+  "tests_before": "",
+  "tests_after": "",
+  "still_failing": [],
+  "iterations": 0,
+  "candidates_tried": 0,
+  "patched_source": null,
+  "diff": "",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "eval\\cases\\10_dangerous_input\\game.py",
+      "tests": "eval\\cases\\10_dangerous_input\\test_game.py",
+      "symptom": "The game crashes on startup.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "refuse",
+      "reason": "target file uses operations the sandbox will not run: import os"
+    },
+    {
+      "step": 3,
+      "action": "report",
+      "status": "refused",
+      "confidence": 0.0,
+      "message": "Refused: target file uses operations the sandbox will not run: import os"
+    }
+  ],
+  "trace_file": null
+}

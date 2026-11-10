@@ -1,0 +1,134 @@
+{
+  "status": "needs_human_review",
+  "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully.",
+  "backend": "offline-heuristic",
+  "confidence": 0.7,
+  "diagnosis": [
+    "Mutable default argument leaks state between games: A function uses a mutable default argument such as history=[] or cache={}."
+  ],
+  "patterns_used": [
+    "mutable-default-argument"
+  ],
+  "retrieved": [
+    {
+      "pattern": "exclusive-boundary",
+      "support": 0.0
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.0
+    },
+    {
+      "pattern": "inverted-hint",
+      "support": 0.0
+    },
+    {
+      "pattern": "mutable-default-argument",
+      "support": 0.0
+    },
+    {
+      "pattern": "off-by-one-counter",
+      "support": 0.0
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.0
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.0
+    }
+  ],
+  "tests_before": "1/2 passed",
+  "tests_after": "2/2 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": "def record_guess(guess, history=None):\n    \"\"\"Append a guess to the game's history and return it.\"\"\"\n    if history is None:\n        history = []\n    history.append(guess)\n    return history\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -1,4 +1,6 @@\n-def record_guess(guess, history=[]):\n+def record_guess(guess, history=None):\n     \"\"\"Append a guess to the game's history and return it.\"\"\"\n+    if history is None:\n+        history = []\n     history.append(guess)\n     return history\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\07_mutable_default\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\07_mutable_default\\test_game.py",
+      "symptom": "Guesses from my last game show up in the history of a new game.",
+      "backend": "offline-heuristic",
+      "retrieval": false,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "1/2 passed",
+      "failing": {
+        "test_history_not_shared_between_games": "assert [5, 7] ==..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "mode": "disabled (blind search over all strategies)",
+      "patterns": [
+        "exclusive-boundary",
+        "incomplete-state-reset",
+        "inverted-hint",
+        "mutable-default-argument",
+        "off-by-one-counter",
+        "reversed-comparison",
+        "score-sign-error",
+        "type-mismatch-comparison"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 1,
+      "candidates": [
+        "[mutable-default-argument] record_guess(): default history=[] -> None"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "record_guess(): default history=[] -> None",
+      "pattern": "mutable-default-argument",
+      "result": "2/2 passed"
+    },
+    {
+      "step": 7,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "mutable-default-argument",
+      "change": "record_guess(): default history=[] -> None",
+      "tests": "2/2 passed"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.7,
+      "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully."
+    }
+  ],
+  "trace_file": null
+}

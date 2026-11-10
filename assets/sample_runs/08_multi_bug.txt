@@ -1,0 +1,67 @@
+$ python investigate.py eval/cases/08_multi_bug/game.py --tests eval/cases/08_multi_bug/test_game.py --symptom "The original glitchy game: hints lie, score goes up when I am wrong, and 9 vs 50 says Too High." --trace
+
+✅ STATUS: fixed   confidence=0.95
+   All tests pass after 3 verified change(s).
+   backend: offline-heuristic
+   tests: 0/3 passed -> 3/3 passed   (iterations=3, candidates tested=15)
+   retrieved patterns: score-sign-error (1.0), type-mismatch-comparison (0.821), inverted-hint (0.736)
+   diagnosis: Score sign error on wrong guesses: An arithmetic operator has the wrong sign: a penalty is written as current_score + 5 instead of current_score - 5, often inside one branch of an if statement on attempt_number parity.
+   diagnosis: Inverted hint direction: The outcome labels ("Too High", "Too Low") are correct but the user-facing messages attached to them are swapped, usually inside a HINT_MESSAGES dictionary or an if/else that returns message strings.
+   diagnosis: Type mismatch in comparison (str vs int): One side of the comparison is converted to a string with str() before comparing with an integer.
+
+--- proposed patch --------------------------------------------------
+--- a/game.py
++++ b/game.py
+@@ -1,4 +1,4 @@
+-HINT_MESSAGES = {"Win": "🎉 Correct!", "Too High": "📈 Go HIGHER!", "Too Low": "📉 Go LOWER!"}
++HINT_MESSAGES = {"Win": "🎉 Correct!", "Too High": "📉 Go LOWER!", "Too Low": "📈 Go HIGHER!"}
+ 
+ 
+ def check_guess(guess, secret):
+@@ -20,11 +20,9 @@
+ def submit_guess(state, guess):
+     state["attempts"] += 1
+     secret = state["secret"]
+-    if state["attempts"] % 2 == 0:
+-        secret = str(secret)
+     outcome = check_guess(guess, secret)
+     if outcome == "Too High" and state["attempts"] % 2 == 0:
+-        state["score"] = state["score"] + 5
++        state["score"] = state["score"] - 5
+     elif outcome != "Win":
+         state["score"] = state["score"] - 5
+     return outcome, HINT_MESSAGES[outcome]
+
+--- agent trace -----------------------------------------------------
+   1. plan     backend=offline-heuristic retrieval=True plan: validate input -> run tests -> retrieve bug patterns -> propose patches -> guardrail-check + verify each patch -> iterate on remaining failures -> score confidence and report for human approval
+   2. validate ok=True
+   3. observe  tests 0/3 passed; failing: test_hint_direction, test_even_attempt_low_guess, test_wrong_guess_lowers_score
+   4. retrieve top chunks: patterns:score-sign-error (24.28); patterns:inverted-hint (23.47); patterns:inverted-hint (19.51); case_history:score-sign-error (18.21) => patterns: score-sign-error (1.0), inverted-hint (0.967), type-mismatch-comparison (0.673)
+   5. propose  iteration 1: 6 candidate patch(es)
+   6. verify   [score-sign-error] change `state["attempts"] += 1` to `state["attempts"] -= 1` => 0/3 passed
+   7. verify   [score-sign-error] change `state["score"] + 5` to `state["score"] - 5` => 1/3 passed
+   8. verify   [score-sign-error] change `state["score"] - 5` to `state["score"] + 5` => 0/3 passed
+   9. verify   [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) => 1/3 passed
+  10. verify   [type-mismatch-comparison] remove `secret = str(secret)` (and its `if state["attempts"] % 2 == 0` guard) => 1/3 passed
+  11. verify   [type-mismatch-comparison] replace str(guess) with guess => 0/3 passed
+  12. accept   iteration 1: keep [score-sign-error] change `state["score"] + 5` to `state["score"] - 5` (1/3 passed)
+  13. retrieve top chunks: patterns:inverted-hint (18.08); patterns:inverted-hint (17.78); patterns:score-sign-error (16.97); case_history:inverted-hint (14.1) => patterns: inverted-hint (1.0), score-sign-error (0.939), type-mismatch-comparison (0.772)
+  14. propose  iteration 2: 6 candidate patch(es)
+  15. verify   [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) => 2/3 passed
+  16. verify   [score-sign-error] change `state["attempts"] += 1` to `state["attempts"] -= 1` => 1/3 passed
+  17. reject   change `state["score"] - 5` to `state["score"] + 5` => rejected: patch makes no change
+  18. verify   [score-sign-error] change `state["score"] - 5` to `state["score"] + 5` => regression: test_wrong_guess_lowers_score
+  19. verify   [type-mismatch-comparison] remove `secret = str(secret)` (and its `if state["attempts"] % 2 == 0` guard) => 2/3 passed
+  20. verify   [type-mismatch-comparison] replace str(guess) with guess => regression: test_wrong_guess_lowers_score
+  21. accept   iteration 2: keep [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) (2/3 passed)
+  22. retrieve top chunks: patterns:score-sign-error (15.22); case_history:score-sign-error (13.2); patterns:type-mismatch-comparison (12.49); case_history:type-mismatch-comparison (11.32) => patterns: score-sign-error (1.0), type-mismatch-comparison (0.821), inverted-hint (0.736)
+  23. propose  iteration 3: 6 candidate patch(es)
+  24. verify   [score-sign-error] change `state["attempts"] += 1` to `state["attempts"] -= 1` => 2/3 passed
+  25. verify   [score-sign-error] change `state["score"] - 5` to `state["score"] + 5` => regression: test_wrong_guess_lowers_score
+  26. verify   [score-sign-error] change `state["score"] - 5` to `state["score"] + 5` => regression: test_wrong_guess_lowers_score
+  27. verify   [type-mismatch-comparison] remove `secret = str(secret)` (and its `if state["attempts"] % 2 == 0` guard) => 3/3 passed
+  28. accept   iteration 3: keep [type-mismatch-comparison] remove `secret = str(secret)` (and its `if state["attempts"] % 2 == 0` guard) (3/3 passed)
+  29. report   status=fixed, confidence=0.95, message=All tests pass after 3 verified change(s).
+
+   full trace saved to logs\traces\20261110-105218-083257_08_multi_bug_game.json
+(exit code 0)

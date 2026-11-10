@@ -1,0 +1,33 @@
+$ python investigate.py eval/cases/01_inverted_hints/game.py --tests eval/cases/01_inverted_hints/test_game.py --symptom "The hint says go higher even though my guess was way too high." --trace
+
+✅ STATUS: fixed   confidence=1.0
+   All tests pass after 1 verified change(s).
+   backend: offline-heuristic
+   tests: 2/4 passed -> 4/4 passed   (iterations=1, candidates tested=1)
+   retrieved patterns: inverted-hint (1.0), reversed-comparison (0.341), type-mismatch-comparison (0.231)
+   diagnosis: Inverted hint direction: The outcome labels ("Too High", "Too Low") are correct but the user-facing messages attached to them are swapped, usually inside a HINT_MESSAGES dictionary or an if/else that returns message strings.
+
+--- proposed patch --------------------------------------------------
+--- a/game.py
++++ b/game.py
+@@ -1,7 +1,7 @@
+ HINT_MESSAGES = {
+     "Win": "🎉 Correct!",
+-    "Too High": "📈 Go HIGHER!",
+-    "Too Low": "📉 Go LOWER!",
++    "Too High": "📉 Go LOWER!",
++    "Too Low": "📈 Go HIGHER!",
+ }
+
+--- agent trace -----------------------------------------------------
+   1. plan     backend=offline-heuristic retrieval=True plan: validate input -> run tests -> retrieve bug patterns -> propose patches -> guardrail-check + verify each patch -> iterate on remaining failures -> score confidence and report for human approval
+   2. validate ok=True
+   3. observe  tests 2/4 passed; failing: test_hint_tells_player_to_go_lower_when_too_high, test_hint_tells_player_to_go_higher_when_too_low
+   4. retrieve top chunks: patterns:inverted-hint (52.81); case_history:inverted-hint (36.91); patterns:inverted-hint (33.65); patterns:reversed-comparison (18.02) => patterns: inverted-hint (1.0), reversed-comparison (0.341), type-mismatch-comparison (0.231)
+   5. propose  iteration 1: 2 candidate patch(es)
+   6. verify   [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) => 4/4 passed
+   7. accept   iteration 1: keep [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) (4/4 passed)
+   8. report   status=fixed, confidence=1.0, message=All tests pass after 1 verified change(s).
+
+   full trace saved to logs\traces\20261110-105158-004100_01_inverted_hints_game.json
+(exit code 0)

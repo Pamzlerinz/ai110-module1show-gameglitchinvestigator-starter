@@ -1,0 +1,142 @@
+{
+  "status": "needs_human_review",
+  "message": "No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate.",
+  "backend": "offline-heuristic",
+  "confidence": 0.0,
+  "diagnosis": [],
+  "patterns_used": [],
+  "retrieved": [
+    {
+      "pattern": "inverted-hint",
+      "support": 1.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.818
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.481
+    }
+  ],
+  "tests_before": "2/3 passed",
+  "tests_after": "2/3 passed",
+  "still_failing": [
+    "test_very_close_hint"
+  ],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": null,
+  "diff": "",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\11_missing_feature\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\11_missing_feature\\test_game.py",
+      "symptom": "I want a Very close hint when the guess is within 5 of the secret.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "2/3 passed",
+      "failing": {
+        "test_very_close_hint": "AssertionError: assert '' == 'Ver..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "I want a Very close hint when the guess is within 5 of the secret. test_very_close_hint AssertionError: assert '' == 'Ver...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Symptoms",
+          "score": 7.83
+        },
+        {
+          "source": "patterns",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Type mismatch in comparison (str vs int): Symptoms",
+          "score": 6.4
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Root cause",
+          "score": 5.12
+        },
+        {
+          "source": "patterns",
+          "pattern": "inverted-hint",
+          "heading": "Inverted hint direction: Fix recipe",
+          "score": 5.0
+        },
+        {
+          "source": "patterns",
+          "pattern": "reversed-comparison",
+          "heading": "Reversed comparison operator: Root cause",
+          "score": 3.76
+        },
+        {
+          "source": "patterns",
+          "pattern": "reversed-comparison",
+          "heading": "Reversed comparison operator: Symptoms",
+          "score": 2.8
+        }
+      ],
+      "patterns": [
+        "inverted-hint (1.0)",
+        "type-mismatch-comparison (0.818)",
+        "reversed-comparison (0.481)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 1,
+      "candidates": [
+        "[reversed-comparison] change `>` to `<` in `guess > secret`"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "change `>` to `<` in `guess > secret`",
+      "pattern": "reversed-comparison",
+      "result": "2/3 passed"
+    },
+    {
+      "step": 7,
+      "action": "stuck",
+      "reason": "no candidate improved the test results without regressions"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.0,
+      "message": "No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate."
+    }
+  ],
+  "trace_file": null
+}

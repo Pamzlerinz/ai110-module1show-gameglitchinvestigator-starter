@@ -1,0 +1,143 @@
+{
+  "status": "fixed",
+  "message": "All tests pass after 1 verified change(s).",
+  "backend": "offline-heuristic",
+  "confidence": 1.0,
+  "diagnosis": [
+    "Incomplete state reset on New Game: The reset or new_game handler resets only some keys of the game state (for example attempts and secret) and forgets others such as status, score, and history."
+  ],
+  "patterns_used": [
+    "incomplete-state-reset"
+  ],
+  "retrieved": [
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 1.0
+    },
+    {
+      "pattern": "streamlit-rerun-state",
+      "support": 0.321
+    }
+  ],
+  "tests_before": "1/3 passed",
+  "tests_after": "3/3 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": "def new_game_state():\n    return {\"secret\": 42, \"attempts\": 0, \"score\": 0, \"status\": \"playing\", \"history\": []}\n\n\ndef reset_game(state, new_secret):\n    state[\"attempts\"] = 0\n    state[\"secret\"] = new_secret\n    state[\"score\"] = 0\n    state[\"status\"] = \"playing\"\n    state[\"history\"] = []\n    return state\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -5,4 +5,7 @@\n def reset_game(state, new_secret):\n     state[\"attempts\"] = 0\n     state[\"secret\"] = new_secret\n+    state[\"score\"] = 0\n+    state[\"status\"] = \"playing\"\n+    state[\"history\"] = []\n     return state\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\05_incomplete_reset\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\05_incomplete_reset\\test_game.py",
+      "symptom": "After I win, clicking New Game still says You already won. The game is stuck.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "1/3 passed",
+      "failing": {
+        "test_reset_clears_status": "AssertionError: assert 'won' ...",
+        "test_reset_clears_score_and_history": "assert 70 == 0"
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "After I win, clicking New Game still says You already won. The game is stuck. test_reset_clears_status test_reset_clears_score_and_history AssertionError: assert 'won' ... assert 70 == 0",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Symptoms",
+          "score": 35.64
+        },
+        {
+          "source": "case_history",
+          "pattern": "incomplete-state-reset",
+          "heading": "New Game left the player stuck on \"You already won\"",
+          "score": 21.89
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Root cause",
+          "score": 20.29
+        },
+        {
+          "source": "patterns",
+          "pattern": "streamlit-rerun-state",
+          "heading": "Streamlit rerun resets plain variables: Symptoms",
+          "score": 11.44
+        },
+        {
+          "source": "patterns",
+          "pattern": "incomplete-state-reset",
+          "heading": "Incomplete state reset on New Game: Fix recipe",
+          "score": 10.43
+        },
+        {
+          "source": "patterns",
+          "pattern": "streamlit-rerun-state",
+          "heading": "Streamlit rerun resets plain variables: Fix recipe",
+          "score": 7.42
+        }
+      ],
+      "patterns": [
+        "incomplete-state-reset (1.0)",
+        "streamlit-rerun-state (0.321)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 1,
+      "candidates": [
+        "[incomplete-state-reset] reset_game() also resets score, status, history"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "reset_game() also resets score, status, history",
+      "pattern": "incomplete-state-reset",
+      "result": "3/3 passed"
+    },
+    {
+      "step": 7,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "incomplete-state-reset",
+      "change": "reset_game() also resets score, status, history",
+      "tests": "3/3 passed"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "fixed",
+      "confidence": 1.0,
+      "message": "All tests pass after 1 verified change(s)."
+    }
+  ],
+  "trace_file": null
+}

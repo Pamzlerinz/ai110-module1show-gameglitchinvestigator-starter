@@ -1,0 +1,38 @@
+status=fixed confidence=0.88 patterns_used=['reversed-comparison', 'inverted-hint']
+   1. plan     backend=offline-heuristic retrieval=True plan: validate input -> run tests -> retrieve bug patterns -> propose patches -> guardrail-check + verify each patch -> iterate on remaining failures -> score confidence and report for human approval
+   2. validate ok=True
+   3. observe  tests 0/3 passed; failing: test_hint_direction, test_even_attempt_low_guess, test_wrong_guess_lowers_score
+   4. retrieve top chunks: patterns:score-sign-error (25.59); patterns:inverted-hint (24.6); patterns:inverted-hint (19.71); patterns:type-mismatch-comparison (17.13) => patterns: score-sign-error (1.0), inverted-hint (0.961), type-mismatch-comparison (0.669), reversed-comparison (0.591)
+   5. propose  iteration 1: 8 candidate patch(es)
+   6. verify   [score-sign-error] change `state["attempts"] += 1` to `state["attempts"] -= 1` => 0/3 passed
+   7. verify   [score-sign-error] change `state["score"] + 5` to `state["score"] - 5` => 1/3 passed
+   8. verify   [score-sign-error] change `state["score"] - 5` to `state["score"] + 5` => 0/3 passed
+   9. verify   [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) => 1/3 passed
+  10. verify   [type-mismatch-comparison] remove `secret = str(secret)` (and its `if state["attempts"] % 2 == 0` guard) => 1/3 passed
+  11. verify   [type-mismatch-comparison] replace str(guess) with guess => 0/3 passed
+  12. verify   [reversed-comparison] change `>` to `<` in `guess > secret` => 1/3 passed
+  13. verify   [reversed-comparison] change `>` to `<` in `g > secret` => 2/3 passed
+  14. accept   iteration 1: keep [reversed-comparison] change `>` to `<` in `g > secret` (2/3 passed)
+  15. retrieve top chunks: patterns:inverted-hint (16.99); patterns:inverted-hint (16.78); patterns:score-sign-error (13.36); patterns:type-mismatch-comparison (11.71) => patterns: inverted-hint (1.0), score-sign-error (0.786), type-mismatch-comparison (0.689), reversed-comparison (0.417)
+  16. propose  iteration 2: 8 candidate patch(es)
+  17. verify   [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) => 3/3 passed
+  18. accept   iteration 2: keep [inverted-hint] swap HIGHER/LOWER wording in 2 string literal(s) (3/3 passed)
+  19. report   status=fixed, confidence=0.88, message=All tests pass after 2 verified change(s).
+--- a/game.py
++++ b/game.py
+@@ -1,4 +1,4 @@
+-HINT_MESSAGES = {"Win": "🎉 Correct!", "Too High": "📈 Go HIGHER!", "Too Low": "📉 Go LOWER!"}
++HINT_MESSAGES = {"Win": "🎉 Correct!", "Too High": "📉 Go LOWER!", "Too Low": "📈 Go HIGHER!"}
+ 
+ 
+ def check_guess(guess, secret):
+@@ -12,7 +12,7 @@
+         g = str(guess)
+         if g == secret:
+             return "Win"
+-        if g > secret:
++        if g < secret:
+             return "Too High"
+         return "Too Low"
+ 
+

@@ -1,0 +1,155 @@
+{
+  "status": "fixed",
+  "message": "All tests pass after 1 verified change(s).",
+  "backend": "offline-heuristic",
+  "confidence": 1.0,
+  "diagnosis": [
+    "Type mismatch in comparison (str vs int): One side of the comparison is converted to a string with str() before comparing with an integer."
+  ],
+  "patterns_used": [
+    "type-mismatch-comparison"
+  ],
+  "retrieved": [
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 1.0
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.537
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.489
+    },
+    {
+      "pattern": "hardcoded-range-message",
+      "support": 0.451
+    }
+  ],
+  "tests_before": "3/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 1,
+  "patched_source": "def check_guess(guess, secret):\n    try:\n        if guess == secret:\n            return \"Win\"\n        if guess > secret:\n            return \"Too High\"\n        return \"Too Low\"\n    except TypeError:\n        g = str(guess)\n        if g == secret:\n            return \"Win\"\n        if g > secret:\n            return \"Too High\"\n        return \"Too Low\"\n\n\ndef play_round(guess, secret, attempt_number):\n    return check_guess(guess, secret)\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -15,6 +15,4 @@\n \n \n def play_round(guess, secret, attempt_number):\n-    if attempt_number % 2 == 0:\n-        secret = str(secret)\n     return check_guess(guess, secret)\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\02_type_mismatch\\game.py",
+      "tests": "C:\\Users\\pampa\\applied-ai-system-project\\eval\\cases\\02_type_mismatch\\test_game.py",
+      "symptom": "A guess of 9 against a secret of 50 sometimes says Too High, but only on some attempts.",
+      "backend": "offline-heuristic",
+      "retrieval": true,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "3/4 passed",
+      "failing": {
+        "test_low_guess_on_even_attempt": "AssertionError: assert ..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "query": "A guess of 9 against a secret of 50 sometimes says Too High, but only on some attempts. test_low_guess_on_even_attempt AssertionError: assert ...",
+      "hits": [
+        {
+          "source": "patterns",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Type mismatch in comparison (str vs int): Symptoms",
+          "score": 18.34
+        },
+        {
+          "source": "case_history",
+          "pattern": "type-mismatch-comparison",
+          "heading": "Guess of 9 said \"Too High\" against a secret of 50",
+          "score": 14.16
+        },
+        {
+          "source": "case_history",
+          "pattern": "score-sign-error",
+          "heading": "Score went up after a wrong guess on even attempts",
+          "score": 9.84
+        },
+        {
+          "source": "patterns",
+          "pattern": "reversed-comparison",
+          "heading": "Reversed comparison operator: Symptoms",
+          "score": 8.97
+        },
+        {
+          "source": "patterns",
+          "pattern": "hardcoded-range-message",
+          "heading": "Hardcoded range in user-facing text: Symptoms",
+          "score": 8.28
+        },
+        {
+          "source": "patterns",
+          "pattern": "score-sign-error",
+          "heading": "Score sign error on wrong guesses: Symptoms",
+          "score": 8.15
+        }
+      ],
+      "patterns": [
+        "type-mismatch-comparison (1.0)",
+        "score-sign-error (0.537)",
+        "reversed-comparison (0.489)",
+        "hardcoded-range-message (0.451)"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 4,
+      "candidates": [
+        "[type-mismatch-comparison] remove `secret = str(secret)` (and its `if attempt_number % 2 == 0` guard)",
+        "[type-mismatch-comparison] replace str(guess) with guess",
+        "[reversed-comparison] change `>` to `<` in `guess > secret`",
+        "[reversed-comparison] change `>` to `<` in `g > secret`"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "remove `secret = str(secret)` (and its `if attempt_number % 2 == 0` guard)",
+      "pattern": "type-mismatch-comparison",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 7,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "type-mismatch-comparison",
+      "change": "remove `secret = str(secret)` (and its `if attempt_number % 2 == 0` guard)",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 8,
+      "action": "report",
+      "status": "fixed",
+      "confidence": 1.0,
+      "message": "All tests pass after 1 verified change(s)."
+    }
+  ],
+  "trace_file": null
+}

@@ -1,0 +1,8 @@
+$ python investigate.py eval/cases/10_dangerous_input/game.py --tests eval/cases/10_dangerous_input/test_game.py --symptom "The game crashes on startup." 
+
+⛔ STATUS: refused   confidence=0.0
+   Refused: target file uses operations the sandbox will not run: import os
+   backend: offline-heuristic
+
+   full trace saved to logs\traces\20261110-105218-622024_10_dangerous_input_game.json
+(exit code 1)

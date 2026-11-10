@@ -1,0 +1,20 @@
+$ python investigate.py eval/cases/11_missing_feature/game.py --tests eval/cases/11_missing_feature/test_game.py --symptom "I want a Very close hint when the guess is within 5 of the secret." --trace
+
+🧑‍🔧 STATUS: needs_human_review   confidence=0.0
+   No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate.
+   backend: offline-heuristic
+   tests: 2/3 passed -> 2/3 passed   (iterations=1, candidates tested=0)
+   retrieved patterns: inverted-hint (1.0), type-mismatch-comparison (0.844)
+   still failing: test_very_close_hint
+
+--- agent trace -----------------------------------------------------
+   1. plan     backend=offline-heuristic retrieval=True plan: validate input -> run tests -> retrieve bug patterns -> propose patches -> guardrail-check + verify each patch -> iterate on remaining failures -> score confidence and report for human approval
+   2. validate ok=True
+   3. observe  tests 2/3 passed; failing: test_very_close_hint
+   4. retrieve top chunks: patterns:inverted-hint (7.09); case_history:inverted-hint (6.62); patterns:type-mismatch-comparison (5.98); case_history:type-mismatch-comparison (5.64) => patterns: inverted-hint (1.0), type-mismatch-comparison (0.844)
+   5. propose  iteration 1: 0 candidate patch(es)
+   6. stuck    reason=no candidate improved the test results without regressions
+   7. report   status=needs_human_review, confidence=0.0, message=No verified fix. The failing tests do not match any repair the agent could confirm; a human should investigate.
+
+   full trace saved to logs\traces\20261110-105220-287360_11_missing_feature_game.json
+(exit code 1)

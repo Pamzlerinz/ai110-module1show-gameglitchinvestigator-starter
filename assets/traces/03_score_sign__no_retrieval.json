@@ -1,0 +1,299 @@
+{
+  "status": "needs_human_review",
+  "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully.",
+  "backend": "offline-heuristic",
+  "confidence": 0.7,
+  "diagnosis": [
+    "Score sign error on wrong guesses: An arithmetic operator has the wrong sign: a penalty is written as current_score + 5 instead of current_score - 5, often inside one branch of an if statement on attempt_number parity."
+  ],
+  "patterns_used": [
+    "score-sign-error"
+  ],
+  "retrieved": [
+    {
+      "pattern": "exclusive-boundary",
+      "support": 0.0
+    },
+    {
+      "pattern": "incomplete-state-reset",
+      "support": 0.0
+    },
+    {
+      "pattern": "inverted-hint",
+      "support": 0.0
+    },
+    {
+      "pattern": "mutable-default-argument",
+      "support": 0.0
+    },
+    {
+      "pattern": "off-by-one-counter",
+      "support": 0.0
+    },
+    {
+      "pattern": "reversed-comparison",
+      "support": 0.0
+    },
+    {
+      "pattern": "score-sign-error",
+      "support": 0.0
+    },
+    {
+      "pattern": "type-mismatch-comparison",
+      "support": 0.0
+    }
+  ],
+  "tests_before": "3/4 passed",
+  "tests_after": "4/4 passed",
+  "still_failing": [],
+  "iterations": 1,
+  "candidates_tried": 23,
+  "patched_source": "def update_score(current_score, outcome, attempt_number):\n    if outcome == \"Win\":\n        points = 100 - 10 * attempt_number\n        if points < 10:\n            points = 10\n        return current_score + points\n\n    if outcome == \"Too High\":\n        if attempt_number % 2 == 0:\n            return current_score - 5\n        return current_score - 5\n\n    if outcome == \"Too Low\":\n        return current_score - 5\n\n    return current_score\n",
+  "diff": "--- a/game.py\n+++ b/game.py\n@@ -7,7 +7,7 @@\n \n     if outcome == \"Too High\":\n         if attempt_number % 2 == 0:\n-            return current_score + 5\n+            return current_score - 5\n         return current_score - 5\n \n     if outcome == \"Too Low\":\n",
+  "trace": [
+    {
+      "step": 1,
+      "action": "plan",
+      "target": "eval\\cases\\03_score_sign\\game.py",
+      "tests": "eval\\cases\\03_score_sign\\test_game.py",
+      "symptom": "My score went up after a wrong guess.",
+      "backend": "offline-heuristic",
+      "retrieval": false,
+      "plan": [
+        "validate input",
+        "run tests",
+        "retrieve bug patterns",
+        "propose patches",
+        "guardrail-check + verify each patch",
+        "iterate on remaining failures",
+        "score confidence and report for human approval"
+      ]
+    },
+    {
+      "step": 2,
+      "action": "validate",
+      "ok": true
+    },
+    {
+      "step": 3,
+      "action": "observe",
+      "tests": "3/4 passed",
+      "failing": {
+        "test_too_high_always_deducts_points": "AssertionError: as..."
+      },
+      "errors": []
+    },
+    {
+      "step": 4,
+      "action": "retrieve",
+      "mode": "disabled (blind search over all strategies)",
+      "patterns": [
+        "exclusive-boundary",
+        "incomplete-state-reset",
+        "inverted-hint",
+        "mutable-default-argument",
+        "off-by-one-counter",
+        "reversed-comparison",
+        "score-sign-error",
+        "type-mismatch-comparison"
+      ]
+    },
+    {
+      "step": 5,
+      "action": "propose",
+      "iteration": 1,
+      "count": 23,
+      "candidates": [
+        "[exclusive-boundary] change `<` to `<=` in `points < 10`",
+        "[off-by-one-counter] change constant 100 to 99",
+        "[off-by-one-counter] change constant 100 to 101",
+        "[off-by-one-counter] change constant 10 to 9",
+        "[off-by-one-counter] change constant 10 to 11",
+        "[off-by-one-counter] change constant 10 to 9",
+        "[off-by-one-counter] change constant 10 to 11",
+        "[off-by-one-counter] change constant 0 to 1",
+        "[off-by-one-counter] change constant 5 to 4",
+        "[off-by-one-counter] change constant 5 to 6",
+        "[off-by-one-counter] change constant 5 to 4",
+        "[off-by-one-counter] change constant 5 to 6"
+      ]
+    },
+    {
+      "step": 6,
+      "action": "verify",
+      "candidate": "change `<` to `<=` in `points < 10`",
+      "pattern": "exclusive-boundary",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 7,
+      "action": "verify",
+      "candidate": "change constant 100 to 99",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus"
+    },
+    {
+      "step": 8,
+      "action": "verify",
+      "candidate": "change constant 100 to 101",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus"
+    },
+    {
+      "step": 9,
+      "action": "verify",
+      "candidate": "change constant 10 to 9",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 10,
+      "action": "verify",
+      "candidate": "change constant 10 to 11",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 11,
+      "action": "verify",
+      "candidate": "change constant 10 to 9",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus_floor"
+    },
+    {
+      "step": 12,
+      "action": "verify",
+      "candidate": "change constant 10 to 11",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus_floor"
+    },
+    {
+      "step": 13,
+      "action": "verify",
+      "candidate": "change constant 0 to 1",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 14,
+      "action": "verify",
+      "candidate": "change constant 5 to 4",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 15,
+      "action": "verify",
+      "candidate": "change constant 5 to 6",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 16,
+      "action": "verify",
+      "candidate": "change constant 5 to 4",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_too_low_deducts_points"
+    },
+    {
+      "step": 17,
+      "action": "verify",
+      "candidate": "change constant 5 to 6",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_too_low_deducts_points"
+    },
+    {
+      "step": 18,
+      "action": "verify",
+      "candidate": "change constant 10 to 9",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus"
+    },
+    {
+      "step": 19,
+      "action": "verify",
+      "candidate": "change constant 10 to 11",
+      "pattern": "off-by-one-counter",
+      "result": "regression: test_win_bonus"
+    },
+    {
+      "step": 20,
+      "action": "verify",
+      "candidate": "change constant 2 to 1",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 21,
+      "action": "verify",
+      "candidate": "change constant 2 to 3",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 22,
+      "action": "verify",
+      "candidate": "change constant 5 to 4",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 23,
+      "action": "verify",
+      "candidate": "change constant 5 to 6",
+      "pattern": "off-by-one-counter",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 24,
+      "action": "verify",
+      "candidate": "change `<` to `>` in `points < 10`",
+      "pattern": "reversed-comparison",
+      "result": "regression: test_win_bonus, test_win_bonus_floor"
+    },
+    {
+      "step": 25,
+      "action": "verify",
+      "candidate": "change `100 - 10 * attempt_number` to `100 + (10 * attempt_number)`",
+      "pattern": "score-sign-error",
+      "result": "regression: test_win_bonus, test_win_bonus_floor"
+    },
+    {
+      "step": 26,
+      "action": "verify",
+      "candidate": "change `current_score - 5` to `current_score + 5`",
+      "pattern": "score-sign-error",
+      "result": "3/4 passed"
+    },
+    {
+      "step": 27,
+      "action": "verify",
+      "candidate": "change `current_score - 5` to `current_score + 5`",
+      "pattern": "score-sign-error",
+      "result": "regression: test_too_low_deducts_points"
+    },
+    {
+      "step": 28,
+      "action": "verify",
+      "candidate": "change `current_score + 5` to `current_score - 5`",
+      "pattern": "score-sign-error",
+      "result": "4/4 passed"
+    },
+    {
+      "step": 29,
+      "action": "accept",
+      "iteration": 1,
+      "pattern": "score-sign-error",
+      "change": "change `current_score + 5` to `current_score - 5`",
+      "tests": "4/4 passed"
+    },
+    {
+      "step": 30,
+      "action": "report",
+      "status": "needs_human_review",
+      "confidence": 0.7,
+      "message": "Tests pass, but confidence 0.7 is below 0.75; review the diff carefully."
+    }
+  ],
+  "trace_file": null
+}
